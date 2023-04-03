@@ -12,6 +12,7 @@ from rest_framework.response import Response
 from .permissions import (IsCoordOrReadOnly, 
                           IsProfileOwner, IsCurrentUser)
 from rest_framework.permissions import IsAuthenticated
+from .utils import get_lots_stats
 
 
 class CustomPagination(PageNumberPagination):
@@ -209,22 +210,6 @@ class VillageView(viewsets.ModelViewSet):
 # # urls.py
 # path('', views.api_home)
 
-user_data = {
-    "nom": "",
-    "postnom": "",
-    "prenom": "",
-    "phone_number": "",
-    "password": "",
-    "is_AT": "",
-    "is_DG": "",
-    "is_COORD": "",
-    "email": "",
-    "sex": "",
-    "birth_date": "",
-    "birth_place": "",
-}
-
-
 @api_view(["GET"])
 def get_user_and_profile(request, *args, **kwargs):
     # body = request.body
@@ -233,49 +218,6 @@ def get_user_and_profile(request, *args, **kwargs):
     if user_instance:
         data = UserRetrieveSerializer(user_instance).data
     return Response(data)
-
-# @api_view(["POST"])
-# def create_user_and_profile(request, *args, **kwargs):
-#     body = request.data
-#     data = {}
-#     try:
-#         data = json.loads(body)
-#     except:
-#         pass
-#     return Response(data)
-
-def update_user_and_profile(request, *args, **kwargs):
-
-    # body = request.body
-    # data = {}
-    # try:
-    #     data = json.loads(body)
-    # except:
-    #     pass
-    # return JsonResponse(data)
-    pass
-
-
-def get_lots_stats(queryset):
-    '''Extract stats from a given lots' 'queryset' '''
-    stats ={'sum_poids_Ta':0,
-            'sum_poids_Sn':0,
-            'sum_poids_W':0,
-            'sum_colis_Ta':0,
-            'sum_colis_Sn':0,
-            'sum_colis_W':0}
-    for obj in queryset:
-        if obj.minerai.symbol == 'Ta':
-            stats['sum_poids_Ta'] += obj.poids
-            stats['sum_colis_Ta'] += obj.colis
-        elif obj.minerai.symbol == 'Sn':
-            stats['sum_poids_Sn'] += obj.poids
-            stats['sum_colis_Sn'] += obj.colis
-        elif obj.minerai.symbol == 'W':
-            stats['sum_poids_W'] += obj.poids
-            stats['sum_colis_W'] += obj.colis
-    return stats
-
 
 @api_view(['GET'])
 def current_user_lots(request, *args, **kwargs):

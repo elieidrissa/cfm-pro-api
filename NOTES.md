@@ -128,6 +128,15 @@ pgShell
 >>> python manage.py migrate
 >>> python manage.py 
 >>> python manage.py loaddata ./fixtures/backup_data.json ./fixtures/backup_data.json 
+- territory data backup
+>>> python manage.py dumpdata cfm_pro_api.Province --format json --indent 4 > ./fixtures/province_data.json
+>>> python manage.py dumpdata cfm_pro_api.Territoire --format json --indent 4 > ./fixtures/territoire_data.json
+>>> python manage.py dumpdata cfm_pro_api.Chefferie --format json --indent 4 > ./fixtures/chefferie_data.json
+>>> python manage.py dumpdata cfm_pro_api.Groupement --format json --indent 4 > ./fixtures/groupement_data.json
+village data failed due to special characters:
+CommandError: Unable to serialize database: 'charmap' codec can't encode character '\u203f' in position 4: character maps to <undefined>
+solution:
+>>> python -Xutf8 manage.py dumpdata cfm_pro_api.Village --format json --indent 4 > ./fixtures/village_data.json
 
 ## PHONE NUMBERS
 >>> pip install django-phonenumber-field
@@ -179,11 +188,24 @@ operable program or batch file.
 > SOLUTION:
 >>> \pset pager off
 
->>> python manage.py dumpdata cfm_pro_api.Province --format json --indent 4 > ./fixtures/province_data.json
->>> python manage.py dumpdata cfm_pro_api.Territoire --format json --indent 4 > ./fixtures/territoire_data.json
->>> python manage.py dumpdata cfm_pro_api.Chefferie --format json --indent 4 > ./fixtures/chefferie_data.json
->>> python manage.py dumpdata cfm_pro_api.Groupement --format json --indent 4 > ./fixtures/groupement_data.json
-village data failed due to special characters:
-CommandError: Unable to serialize database: 'charmap' codec can't encode character '\u203f' in position 4: character maps to <undefined>
-solution:
->>> python -Xutf8 manage.py dumpdata cfm_pro_api.Village --format json --indent 4 > ./fixtures/village_data.json
+
+
+## SHORD UUID
+
+>>> pip install shortuuid
+
+```python
+import shortuuid
+
+from shortuuid.django_fields import ShortUUIDField
+
+class MyModel(models.Model):
+    # A primary key ID of length 16 and a short alphabet.
+    id = ShortUUIDField(
+        length=16,
+        max_length=40,
+        prefix="id_",
+        alphabet="abcdefg1234",
+        primary_key=True,
+    )
+```
