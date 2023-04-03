@@ -178,3 +178,12 @@ User = serializers.HiddenField(default=serializers.CurrentUserDefault())
 operable program or batch file.
 > SOLUTION:
 >>> \pset pager off
+
+>>> python manage.py dumpdata cfm_pro_api.Province --format json --indent 4 > ./fixtures/province_data.json
+>>> python manage.py dumpdata cfm_pro_api.Territoire --format json --indent 4 > ./fixtures/territoire_data.json
+>>> python manage.py dumpdata cfm_pro_api.Chefferie --format json --indent 4 > ./fixtures/chefferie_data.json
+>>> python manage.py dumpdata cfm_pro_api.Groupement --format json --indent 4 > ./fixtures/groupement_data.json
+village data failed due to special characters:
+CommandError: Unable to serialize database: 'charmap' codec can't encode character '\u203f' in position 4: character maps to <undefined>
+solution:
+>>> python -Xutf8 manage.py dumpdata cfm_pro_api.Village --format json --indent 4 > ./fixtures/village_data.json
