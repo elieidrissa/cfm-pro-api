@@ -14,8 +14,12 @@ class IsCoordOrDeny(BasePermission):
             return bool(user.is_superuser or user.is_COORD)
         return False
     
-class IsDirecteurOrDeny(BasePermission):
-    pass
+class IsSuperUserOrDeny(BasePermission):
+    def has_permission(self, request, view):
+        user  = request.user
+        if user.is_authenticated:             
+            return bool(user.is_superuser)
+        return False
 
 class IsCoordOrReadOnly(BasePermission):
     def has_permission(self, request, view):
@@ -34,14 +38,23 @@ class IsProfileOwner(BasePermission):
             if user.is_superuser or obj.user == user:
                 return True
         return False
+
+class UpdateOrDeleteNotAllowed(BasePermission):
+    def has_permission(self, request, view):
+        user = request.user
+        if user.is_authenticated:
+            return bool(request.method in SAFE_METHODS or user.is_superuser)
+        return False
    
     
-# for user details
+# for user details 
 class IsCurrentUser(BasePermission):
     def has_permission(self, request, view):
-        instance = User.objects.get(phone_number=request.user.phone_number)
-        if instance:
-            return(instance == request.user)
+        user = request.user
+        if user.is_authenticated:
+            instance = User.objects.get(phone_number=request.user.phone_number)
+            if instance:
+                return(instance == request.user)
         return False
-    
+        
 # class BlockListPermission(permissions.DjangoModelPermission):

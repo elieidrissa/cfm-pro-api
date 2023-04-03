@@ -4,10 +4,13 @@ from .models import *
 from phonenumber_field.serializerfields import PhoneNumberField
 
 
+# -------------------------------------------------------------------------------
+# USER AND PROFILE-MODELS
+# -------------------------------------------------------------------------------
 
 class UserProfileSerializer(serializers.ModelSerializer):
     user = serializers.PrimaryKeyRelatedField(read_only=True, 
-                                              default=serializers.CurrentUserDefault())
+                       default=serializers.CurrentUserDefault())
     class Meta:
         model = Profile
         fields = ['user', 'birth_date', 'sex', 'id_number', 
@@ -96,9 +99,22 @@ class UserRetrieveSerializer(serializers.ModelSerializer):
         fields = ['nom', 'postnom', 'prenom',
                   'phone_number', 'profile',]
 
+# -------------------------------------------------------------------------------
+# LOT-MODEL
+# -------------------------------------------------------------------------------
 
-class LotSerializer(serializers.ModelSerializer):
-    added_by = serializers.ReadOnlyField(source='user.nom')
+class LotModelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Lot
+        fields = "__all__"
+
+class LotHyperlinkedSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Lot
+        fields = "__all__"
+
+class LotDetailSerializer(serializers.ModelSerializer):
+    # added_by = serializers.ReadOnlyField(source='user.nom')
 
     def to_representation(self, instance):
         # get data related to the lot
@@ -113,12 +129,16 @@ class LotSerializer(serializers.ModelSerializer):
         response['chantier'] = instance.chantier.name
         response['cooperative'] = instance.cooperative.short_name
         response['transporteur'] = transport.nom + ' ' + transport.postnom
-        # return json
+        # resulting data
         return response
 
     class Meta:
         model = Lot
         fields = "__all__"
+
+# -------------------------------------------------------------------------------
+# ADDITIONAL-MODELS
+# -------------------------------------------------------------------------------
 
 class NegociantSerializer(serializers.ModelSerializer):
 

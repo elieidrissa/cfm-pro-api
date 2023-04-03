@@ -9,9 +9,9 @@ from rest_framework.pagination import (LimitOffsetPagination,
                                        PageNumberPagination)
 from rest_framework.response import Response
 # permissions
-from .permissions import (IsCoordOrReadOnly, 
+from rest_framework.permissions import IsAuthenticated, SAFE_METHODS
+from .permissions import (IsCoordOrReadOnly, UpdateOrDeleteNotAllowed,
                           IsProfileOwner, IsCurrentUser)
-from rest_framework.permissions import IsAuthenticated
 from .utils import get_lots_stats
 
 
@@ -29,34 +29,10 @@ class AddressChoicesPagination(PageNumberPagination):
     page_size_query_param = 'page_size'
     max_page_size = 100
 
-# USER UPDATE
-# @login_required
-# def profile(request):
-#     if request.method == 'POST':
-#         u_form = UserUpdateForm(request.POST, instance=request.user)
-#         p_form = ProfileUpdateForm(request.POST,
-#                                    request.FILES,
-#                                    instance=request.user.profile)
-#         if u_form.is_valid() and p_form.is_valid():
-#             u_form.save()
-#             p_form.save()
-#             messages.success(request, f'Your account has been updated!')
-#             return redirect('profile')
- 
-#     else:
-#         u_form = UserUpdateForm(instance=request.user)
-#         p_form = ProfileUpdateForm(instance=request.user.profile)
- 
-#     context = {
-#         'u_form': u_form,
-#         'p_form': p_form
-#     }
- 
-#     return render(request, 'users/profile.html', context)
-
 class UserCreateView(generics.GenericAPIView):
     permission_classes = () # no permission required
     serializer_class = UserCreateSerializer
+    http_method_names = ['post']
 
     def post(self, request):
         data = request.data
@@ -85,13 +61,27 @@ class UserProfileView(viewsets.ModelViewSet):
         self.check_object_permissions(self.request, obj)
         return obj
     
+    def update(self, request, *args, **kwargs):
+        user = request.user
+        instance = self.get_object()
+        data = request.data
+        serializer = self.serializer_class(instance=instance,
+                                            data=data,
+                                            # context={'author': user},
+                                            partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(data=serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
     
 class UserProfileListView(viewsets.ModelViewSet):
     queryset = Profile.objects.all()
     pagination_class = CustomPagination
     serializer_class = UserProfileSerializer
-    permission_classes = (IsProfileOwner, IsAuthenticated)
-
+    permission_classes = (IsAuthenticated,)
+    http_method_names = ['get', 'head', 'options']
 
 
 class UserRetrieveView(viewsets.ModelViewSet):
@@ -104,28 +94,47 @@ class UserRetrieveListView(viewsets.ModelViewSet):
     '''Gives the list of all users to the 'coord' level users'''
     queryset = User.objects.all()
     serializer_class = UserRetrieveSerializer
-    permission_classes = (IsCoordOrReadOnly,)
+    http_method_names = ['get', 'head', 'options']
 
 
-class LotView(viewsets.ModelViewSet):
+class LotHyperlinkedView(viewsets.ModelViewSet):
     '''Retrieve Lots'''
+    permission_classes = (IsCoordOrReadOnly, )
+    queryset = Lot.objects.all()
+    serializer_class = LotHyperlinkedSerializer
+    pagination_class = CustomPagination
+    # pagination_class = LimitOffsetPagination
+
+
+class LotModelView(viewsets.ModelViewSet):
+    '''Retrieve Lots with details'''
     permission_classes = (IsCoordOrReadOnly,)
     queryset = Lot.objects.all()
-    serializer_class = LotSerializer
+    serializer_class = LotModelSerializer
+    pagination_class = CustomPagination
+
+
+class LotCustomView(viewsets.ModelViewSet):
+    '''Retrieve Lots with details'''
+    permission_classes = (IsCoordOrReadOnly,)
+    queryset = Lot.objects.all()
+    serializer_class = LotDetailSerializer
     pagination_class = CustomPagination
 
 
 class LotListCreateView(generics.ListCreateAPIView):
-    '''This view is used to POST many lots as a list'''
+    '''This view is used to POST as list of lots'''
     queryset = Lot.objects.all()
-    serializer_class = LotSerializer
-    pagination_class = LimitOffsetPagination
+    serializer_class = LotModelSerializer
+    pagination_class = CustomPagination
+    # pagination_class = LimitOffsetPagination
+    http_method_names = ['post']
 
     def list(self, request):
         queryset = self.get_queryset()
-        serializer = LotSerializer(queryset, many=True)
+        serializer = LotModelSerializer(queryset, many=True)
         return Response(serializer.data)
-    
+
     def post(self, request, format=None):
         data = request.data
         if isinstance(data, list): 
@@ -136,73 +145,90 @@ class LotListCreateView(generics.ListCreateAPIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class LotCustomView(viewsets.ModelViewSet):
+    '''filter lots by URL params'''
+    permission_classes = (IsCoordOrReadOnly,)
+    queryset = Lot.objects.all()
+    serializer_class = LotDetailSerializer
+    pagination_class = CustomPagination
     
 
 class NegociantView(viewsets.ModelViewSet):
     queryset = Negociant.objects.all()
     serializer_class = NegociantSerializer
+    permission_classes = (IsCoordOrReadOnly,)
 
 
 class TransporteurView(viewsets.ModelViewSet):
     queryset = Transporteur.objects.all()
     serializer_class = TransporteurSerializer
+    permission_classes = (IsCoordOrReadOnly,)
 
 
 class MineraiView(viewsets.ModelViewSet):
     queryset = Minerai.objects.all()
     serializer_class = MineraiSerializer
+    permission_classes = (IsCoordOrReadOnly,)
 
 
 class CooperativeView(viewsets.ModelViewSet):
     queryset = Cooperative.objects.all()
     serializer_class = CooperativeSerializer
+    permission_classes = (IsCoordOrReadOnly,)
 
 
 class AxeView(viewsets.ModelViewSet):
     queryset = Axe.objects.all()
     serializer_class = AxeSerializer
+    permission_classes = (IsCoordOrReadOnly,)
 
 
 class SiteView(viewsets.ModelViewSet):
     queryset = Site.objects.all()
     serializer_class = SiteSerializer
+    permission_classes = (IsCoordOrReadOnly,)
 
 
 class ChantierView(viewsets.ModelViewSet):
     queryset = Chantier.objects.all()
     serializer_class = ChantierSerializer
+    permission_classes = (IsCoordOrReadOnly,)
 
 # -------------------------------------------------------------------------------
 # TERRITORIES AND SUB_TERRITORIES
 # -------------------------------------------------------------------------------
 
+
 class ProvinceView(viewsets.ModelViewSet):
     queryset = Province.objects.all()
     serializer_class = ProvinceSerializer
+    http_method_names = ['get', 'head', 'options']
 
 
 class TerritoireView(viewsets.ModelViewSet):
     queryset = Territoire.objects.all()
     serializer_class = TerritoireSerializer
     pagination_class = AddressChoicesPagination
-
+    http_method_names = ['get', 'head', 'options']
 
 class ChefferieView(viewsets.ModelViewSet):
     queryset = Chefferie.objects.all()
     serializer_class = ChefferieSerializer
     pagination_class = AddressChoicesPagination
-
+    http_method_names = ['get', 'head', 'options']
 
 class GroupementView(viewsets.ModelViewSet):
     queryset = Groupement.objects.all()
     serializer_class = GroupementSerializer
     pagination_class = AddressChoicesPagination
-
+    http_method_names = ['get', 'head', 'options']
 
 class VillageView(viewsets.ModelViewSet):
     queryset = Village.objects.all()
     serializer_class = VillageSerializer
     pagination_class = AddressChoicesPagination
+    http_method_names = ['get', 'head', 'options']
 
 # # views
 # def api_home(request):
@@ -221,16 +247,16 @@ def get_user_and_profile(request, *args, **kwargs):
 
 @api_view(['GET'])
 def current_user_lots(request, *args, **kwargs):
-    '''Get the following data: 
+    '''Get the following data:
     - all lots added by the current user
-    - sum of poids
-    - sum of colis'''
+    - total of poids
+    - total of colis'''
     user = request.user
     queryset = Lot.objects.filter(user=user)
     # stats
     data = get_lots_stats(queryset)
     # lots data
-    serializer = LotSerializer(queryset, many=True)
+    serializer = LotDetailSerializer(queryset, many=True)
     serialized_qs = serializer.data
     # response data
     data.update({'lots':serialized_qs})
