@@ -208,4 +208,16 @@ class MyModel(models.Model):
         alphabet="abcdefg1234",
         primary_key=True,
     )
+
+# CHOICES
+class book(models.model):
+    class GenreChoices(models.TextChoices):
+        CRIME = 'C'
+        FICTION = 'F'
+        SCI_FI = 'S'
+    name = models.CharField(max_length=120)
+    genre = models.CharField(choices=GenreChoices.choices)
 ```
+
+# FILTERS
+>>> pip install django-filter

@@ -7,11 +7,12 @@ class ReadOnly(BasePermission):
             return(request.method in SAFE_METHODS)
         return False
 
-class IsCoordOrDeny(BasePermission):
+class IsCoordOrDirecteur(BasePermission):
     def has_permission(self, request, view):
         user  = request.user
         if user.is_authenticated:             
-            return bool(user.is_superuser or user.is_COORD)
+            return bool(user.is_superuser 
+                        or user.is_COORD or user.is_DG)
         return False
     
 class IsSuperUserOrDeny(BasePermission):

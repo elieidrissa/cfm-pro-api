@@ -37,11 +37,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    
-    # my apps
+    # third party libraries
     'rest_framework',
     'rest_framework.authtoken',
     'phonenumber_field',
+    'django_filters',
+    # my apps
     'cfm_pro_api'
 ]
 

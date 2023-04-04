@@ -2,6 +2,7 @@ from .models import *
 from .serializers import *
 from django.shortcuts import render
 from rest_framework import generics, status, viewsets
+from rest_framework.generics import ListAPIView
 from rest_framework.decorators import action, api_view
 from rest_framework.response import Response
 # Pagination types
@@ -11,8 +12,12 @@ from rest_framework.response import Response
 # permissions
 from rest_framework.permissions import IsAuthenticated, SAFE_METHODS
 from .permissions import (IsCoordOrReadOnly, UpdateOrDeleteNotAllowed,
-                          IsProfileOwner, IsCurrentUser)
+                          IsProfileOwner, IsCurrentUser, IsCoordOrDirecteur)
+# my toolkit
 from .utils import get_lots_stats
+# filters
+from django_filters.rest_framework import DjangoFilterBackend
+from .filters import LotFilter
 
 
 class CustomPagination(PageNumberPagination):
@@ -112,6 +117,7 @@ class LotModelView(viewsets.ModelViewSet):
     queryset = Lot.objects.all()
     serializer_class = LotModelSerializer
     pagination_class = CustomPagination
+    filter_backends = (DjangoFilterBackend,)
 
 
 class LotCustomView(viewsets.ModelViewSet):
@@ -130,29 +136,15 @@ class LotListCreateView(generics.ListCreateAPIView):
     # pagination_class = LimitOffsetPagination
     http_method_names = ['post']
 
-    def list(self, request):
-        queryset = self.get_queryset()
-        serializer = LotModelSerializer(queryset, many=True)
-        return Response(serializer.data)
-
-    def post(self, request, format=None):
-        data = request.data
-        if isinstance(data, list): 
-            serializer = self.get_serializer(data=request.data, many=True)
-        else:
-            serializer = self.get_serializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class LotCustomView(viewsets.ModelViewSet):
     '''filter lots by URL params'''
-    permission_classes = (IsCoordOrReadOnly,)
+    permission_classes = (IsCoordOrDirecteur,)
     queryset = Lot.objects.all()
     serializer_class = LotDetailSerializer
     pagination_class = CustomPagination
-    
+
+
 
 class NegociantView(viewsets.ModelViewSet):
     queryset = Negociant.objects.all()
@@ -264,3 +256,22 @@ def current_user_lots(request, *args, **kwargs):
 
 
 
+class LotFilterListView(ListAPIView):
+    '''This view is used to SEARCH through list of lots'''
+    serializer_class = LotDetailSerializer
+    pagination_class = CustomPagination
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = LotFilter
+
+    def get_queryset(self):
+        request = self.request
+        user = request.user
+
+        # only show 'all lots' to COORD or higher users
+        if user.is_COORD or user.is_superuser or user.is_DG:
+            qs = Lot.objects.all()
+        else:
+            qs = Lot.objects.filter(user=user)
+
+        self.filterset = LotFilter(request.GET, queryset=qs)
+        return self.filterset.qs
