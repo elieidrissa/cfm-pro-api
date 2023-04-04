@@ -221,3 +221,7 @@ class book(models.model):
 
 # FILTERS
 >>> pip install django-filter
+
+# DOCUMENTATION
+>>> pip install drf spectacular
+<!-- >>> pip install swagger-ui -->
