@@ -17,7 +17,7 @@ from .permissions import (IsCoordOrReadOnly, UpdateOrDeleteNotAllowed,
 from .utils import get_lots_stats
 # filters
 from django_filters.rest_framework import DjangoFilterBackend
-from .filters import LotFilter
+from .filters import LotFilter, NegociantFilter
 
 
 class CustomPagination(PageNumberPagination):
@@ -101,7 +101,9 @@ class UserRetrieveListView(viewsets.ModelViewSet):
     serializer_class = UserRetrieveSerializer
     http_method_names = ['get', 'head', 'options']
 
-
+# -------------------------------------------------------------------------------
+# LOTS-VIEWS
+# -------------------------------------------------------------------------------
 class LotHyperlinkedView(viewsets.ModelViewSet):
     '''Retrieve Lots'''
     permission_classes = (IsCoordOrReadOnly, )
@@ -144,13 +146,65 @@ class LotCustomView(viewsets.ModelViewSet):
     serializer_class = LotDetailSerializer
     pagination_class = CustomPagination
 
+# @api_view(['GET'])
+# def current_user_lots(request, *args, **kwargs):
+#     '''Get the following data:
+#     - all lots added by the current user
+#     - total of poids
+#     - total of colis'''
+#     user = request.user
+#     queryset = Lot.objects.filter(user=user)
+#     # stats
+#     data = get_lots_stats(queryset)
+#     # lots data
+#     serializer = LotDetailSerializer(queryset, many=True)
+#     serialized_qs = serializer.data
+#     # response data
+#     data.update({'lots':serialized_qs})
+#     return Response(data)
 
 
+class LotFilterListView(ListAPIView):
+    '''This view is used to SEARCH through list of lots'''
+    serializer_class = LotDetailSerializer
+    pagination_class = CustomPagination
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = LotFilter
+
+    def get_queryset(self):
+        request = self.request
+        user = request.user
+
+        # only show 'all lots' to COORD or higher users
+        if user.is_COORD or user.is_superuser or user.is_DG:
+            qs = Lot.objects.all()
+        else:
+            qs = Lot.objects.filter(user=user)
+
+        self.filterset = LotFilter(request.GET, queryset=qs)
+        return self.filterset.qs
+
+# -------------------------------------------------------------------------------
+# NEGOCIANTS, TRANSPORTEURS AND MINERAI
+# -------------------------------------------------------------------------------
 class NegociantView(viewsets.ModelViewSet):
     queryset = Negociant.objects.all()
     serializer_class = NegociantSerializer
     permission_classes = (IsCoordOrReadOnly,)
 
+class NegociantFilterListView(ListAPIView):
+    '''This view is used to SEARCH through list of lots'''
+    queryset = Negociant.objects.all()
+    serializer_class = LotDetailSerializer
+    pagination_class = CustomPagination
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = NegociantFilter
+
+    def get_queryset(self):
+        req = self.request
+        qs = self.queryset
+        self.filterset = NegociantFilter(req.GET, queryset=qs)
+        return self.filterset.qs
 
 class TransporteurView(viewsets.ModelViewSet):
     queryset = Transporteur.objects.all()
@@ -237,41 +291,3 @@ def get_user_and_profile(request, *args, **kwargs):
         data = UserRetrieveSerializer(user_instance).data
     return Response(data)
 
-@api_view(['GET'])
-def current_user_lots(request, *args, **kwargs):
-    '''Get the following data:
-    - all lots added by the current user
-    - total of poids
-    - total of colis'''
-    user = request.user
-    queryset = Lot.objects.filter(user=user)
-    # stats
-    data = get_lots_stats(queryset)
-    # lots data
-    serializer = LotDetailSerializer(queryset, many=True)
-    serialized_qs = serializer.data
-    # response data
-    data.update({'lots':serialized_qs})
-    return Response(data)
-
-
-
-class LotFilterListView(ListAPIView):
-    '''This view is used to SEARCH through list of lots'''
-    serializer_class = LotDetailSerializer
-    pagination_class = CustomPagination
-    filter_backends = (DjangoFilterBackend,)
-    filterset_class = LotFilter
-
-    def get_queryset(self):
-        request = self.request
-        user = request.user
-
-        # only show 'all lots' to COORD or higher users
-        if user.is_COORD or user.is_superuser or user.is_DG:
-            qs = Lot.objects.all()
-        else:
-            qs = Lot.objects.filter(user=user)
-
-        self.filterset = LotFilter(request.GET, queryset=qs)
-        return self.filterset.qs
