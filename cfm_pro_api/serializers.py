@@ -7,6 +7,10 @@ from phonenumber_field.serializerfields import PhoneNumberField
 # -------------------------------------------------------------------------------
 # USER AND PROFILE-MODELS
 # -------------------------------------------------------------------------------
+class UserZoneSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Zone
+        fields = '__all__'
 
 class UserProfileSerializer(serializers.ModelSerializer):
     user = serializers.PrimaryKeyRelatedField(read_only=True, 
@@ -14,7 +18,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         fields = ['user', 'birth_date', 'sex', 'id_number', 
-                  'address', 'plot_number', 'profile_img_url',
+                  'address', 'address_info', 'profile_img_url',
                   'email']
         read_only_fields = ['user']
 
@@ -26,13 +30,13 @@ class UserCreateSerializer(serializers.ModelSerializer):
     phone_number = PhoneNumberField(allow_null=False, allow_blank=False)
     password = serializers.CharField(min_length=6, max_length=120)
     conf_password = serializers.CharField(min_length=6, max_length=120, write_only=True)
+    zone = serializers.PrimaryKeyRelatedField(queryset=Zone.objects.all())
     is_AT = serializers.BooleanField(default=False)
     is_COORD = serializers.BooleanField(default=False)
     is_DG = serializers.BooleanField(default=False)
     
     def validate(self, attrs):
         ''' Check form missing of duplicated data'''
-
         phone_number_exists = User.objects.filter(phone_number=attrs['phone_number']).exists()
         
         if phone_number_exists:
@@ -54,6 +58,7 @@ class UserCreateSerializer(serializers.ModelSerializer):
             postnom = validated_data['postnom'],
             prenom = validated_data['prenom'],
             phone_number = validated_data['phone_number'],
+            zone = validated_data['zone'],
             is_AT = validated_data['is_AT'],
             is_COORD = validated_data['is_COORD'],
             is_DG = validated_data['is_DG'],
@@ -67,7 +72,7 @@ class UserCreateSerializer(serializers.ModelSerializer):
         model = User
         fields = ['nom', 'postnom', 'prenom',
                   'phone_number', 'password', 'conf_password',
-                  'is_AT', 'is_DG', 'is_COORD']
+                  'zone', 'is_AT', 'is_DG', 'is_COORD']
         # nom and postnom must be unique to one user
         validators = [
             UniqueTogetherValidator(
@@ -84,10 +89,12 @@ class UserRetrieveSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         return {
+            "id": instance.id,
             "nom" : instance.nom,
             "postnom" : instance.postnom,
             "prenom" : instance.prenom,
             "phone_number" : str(instance.phone_number),
+            "zone" : instance.zone.code,
             'profile':  UserProfileSerializer(instance.profile).data,
             "is_AT" : instance.is_AT,
             "is_COORD" : instance.is_COORD,

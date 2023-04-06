@@ -10,13 +10,6 @@ from django.contrib.auth.models import PermissionsMixin
 # options
 SEX_CHOICES = [('M', 'Male'), ('F', 'Female')]
 
-ZONE_CHOICES = [('ALL', 'Partout'),
-                  ('KIN', 'Kinshasa'),
-                  ('GOM', 'Goma'), 
-                  ('KND', 'Kindu'), 
-                  ('MSS', 'Masisi'), 
-                  ('BKV', 'Bukavu')]
-
 # profile img: https://www.gravatar.com/avatar/2c7d99fe281ecd3bcd65ab915bac6dd5?s=150
 
 # -------------------------------------------------------------------------------
@@ -102,7 +95,8 @@ class UserManager(BaseUserManager):
         - is_SUPER -> Super User'''
     
     def create_user(self, nom=None, postnom=None, 
-                    phone_number=None, password=None, **extra_fields):
+                    phone_number=None, password=None,
+                    zone=None, **extra_fields):
         '''create a user object '''
 
         if not nom or not postnom:
@@ -111,11 +105,15 @@ class UserManager(BaseUserManager):
         if not phone_number or not password:
             raise ValueError('Phone number or Password not provided')
         
+        if not zone:
+            raise ValueError('Zone not specified')
+        
         # create a new user object
         user = self.model(
             nom = nom,
             postnom = postnom,
             phone_number = phone_number,
+            zone=Zone(pk=zone)
         )
 
         # hashed password (change password the same way)
@@ -125,11 +123,13 @@ class UserManager(BaseUserManager):
         return user
  
     def create_superuser(self, nom=None, postnom=None, 
-                    phone_number=None, password=None, **extra_fields):
+                    phone_number=None, password=None, 
+                    zone=None,**extra_fields):
         '''Save the user as an 'All access' user '''
         user = self.create_user(nom=nom, postnom=postnom, 
                                 phone_number = phone_number,
-                                password=password, **extra_fields)
+                                password=password,
+                                zone=zone, **extra_fields)
         # perms
         user.is_AT = True
         user.is_COORD = True
@@ -142,6 +142,23 @@ class UserManager(BaseUserManager):
         
         return user
     
+
+class Zone(models.Model):
+    '''Zone where a user works. This helps filter data by regions'''
+    name = models.CharField(max_length=50, unique=True)
+    territoire = models.OneToOneField(Territoire, null=True, on_delete=models.CASCADE)
+    code = models.CharField(max_length=5, unique=True)
+    date_added = models.DateTimeField(auto_now_add=True)
+    date_updated = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.name + ', ' + self.code
+
+    class Meta:
+        db_table = 'zones'
+        unique_together = ('territoire', 'code')
+
+    
 class User(AbstractBaseUser, PermissionsMixin):
     '''This model represents all users of API with their varying permissions.
         Users of this API roles and their permissions:
@@ -152,12 +169,13 @@ class User(AbstractBaseUser, PermissionsMixin):
       - SUPER: has unrestricted access to everything'''
     
     # required infos
-    # id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     nom = models.CharField(max_length=50)
     postnom = models.CharField(max_length=50)
     prenom = models.CharField(max_length=50, blank=True)
     phone_number = PhoneNumberField(unique=True)
     password = models.CharField(max_length=120)
+    zone = models.ForeignKey(Zone, on_delete=models.SET_NULL, null=True)
     # checks for user type and perms
     is_AT = models.BooleanField('Agent de terrain', default=False)
     is_COORD = models.BooleanField('Coordonnateur', default=False)
@@ -168,7 +186,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_superuser = models.BooleanField('superuser',default=False)
     
     USERNAME_FIELD = 'phone_number'
-    REQUIRED_FIELDS = ['nom', 'postnom', 'password']
+    REQUIRED_FIELDS = ['nom', 'postnom', 'password', 'zone']
 
     # manager for crud operations on all users
     objects = UserManager()
@@ -180,12 +198,12 @@ class User(AbstractBaseUser, PermissionsMixin):
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     birth_date = models.DateField(blank=True, null=True)
+    birth_place = models.ForeignKey(Territoire, null=True, blank=True, on_delete=models.SET_NULL)
     sex = models.CharField(max_length=10, choices=SEX_CHOICES, blank=True)
     id_number = models.CharField(max_length=100, blank=True)
-    address = models.ForeignKey(Village, null=True, blank=True, on_delete=models.SET_NULL)
-    plot_number = models.CharField(max_length=10, null=True, blank=True)
+    address = models.ForeignKey(Groupement, null=True, blank=True, on_delete=models.SET_NULL)
+    address_info = models.CharField(max_length=200, null=True, blank=True)
     profile_img_url = models.URLField(blank=True, null=True)
-    zone = models.CharField(choices=ZONE_CHOICES, max_length=20)
     date_signup = models.DateTimeField(auto_now_add=True)
     date_updated = models.DateTimeField(auto_now=True)
     date_deleted = models.DateTimeField(blank=True, null=True)
@@ -197,6 +215,7 @@ class Profile(models.Model):
         db_table = 'profiles'
         unique_together = ('user', 'email',)
 
+
 # -------------------------------------------------------------------------------
 # NEGOCIANTS, TRANSPORTEURS AND MINERAI
 # -------------------------------------------------------------------------------
@@ -205,12 +224,13 @@ class Negociant(models.Model):
     '''All data that can be collected on a 'negociant' at the moment 03/2023'''
     nom = models.CharField(max_length=50)
     postnom = models.CharField(max_length=50)
-    prenom = models.CharField(max_length=50, blank=True)
-    phone_number = PhoneNumberField(unique=True)
-    birth_date = models.DateField(blank=True)
+    prenom = models.CharField(max_length=50, null=True, blank=True)
+    phone_number = PhoneNumberField(unique=True, null=True)
+    birth_date = models.DateField(null=True, blank=True)
+    birth_place = models.ForeignKey(Territoire, null=True, blank=True, on_delete=models.SET_NULL)
     sex = models.CharField(max_length=10, choices=SEX_CHOICES)
-    address = models.ForeignKey(Village, null=True, blank=True, on_delete=models.SET_NULL)
-    plot_number = models.CharField(max_length=10, null=True, blank=True)
+    address = models.ForeignKey(Groupement, null=True, blank=True, on_delete=models.SET_NULL)
+    address_info = models.CharField(max_length=200, null=True, blank=True)
     card_number = models.CharField(max_length=100, unique=True)
     date_added = models.DateTimeField(auto_now_add=True)
     date_updated = models.DateTimeField(auto_now=True)
@@ -228,12 +248,12 @@ class Transporteur(models.Model):
       but not required'''
     nom = models.CharField(max_length=50)
     postnom = models.CharField(max_length=50)
-    prenom = models.CharField(max_length=50, blank=True)
+    prenom = models.CharField(max_length=50, null=True, blank=True)
     negociant = models.ForeignKey(Negociant, on_delete=models.SET_NULL, blank=True, null=True)
-    phone_number = PhoneNumberField(unique=True)
+    phone_number = PhoneNumberField(unique=True, null=True, blank=True)
     authorization = models.CharField(max_length=30, blank=True, unique=True)
-    address = models.ForeignKey(Village, null=True, blank=True, on_delete=models.SET_NULL)
-    plot_number = models.CharField(max_length=10, null=True, blank=True)
+    address = models.ForeignKey(Groupement, null=True, blank=True, on_delete=models.SET_NULL)
+    address_info = models.CharField(max_length=200, null=True, blank=True)
     plates = models.CharField(max_length=1000)
     date_added = models.DateTimeField(auto_now_add=True)
     date_updated = models.DateTimeField(auto_now=True)
@@ -267,8 +287,9 @@ class Cooperative(models.Model):
     '''This data will be added buy the COORD user'''
     long_name = models.CharField(max_length=150, unique=True)
     short_name = models.CharField(max_length=50, unique=True)
-    address = models.CharField(max_length=100)
-    agrement = models.CharField(max_length=30, unique=True)
+    address = models.ForeignKey(Groupement, null=True, blank=True, on_delete=models.SET_NULL)
+    address_info = models.CharField(max_length=200, null=True, blank=True,)
+    agrement = models.CharField(max_length=30, unique=True, null=True, blank=True)
     date_added = models.DateTimeField(auto_now_add=True)
     date_updated = models.DateTimeField(auto_now=True)
     
@@ -298,10 +319,7 @@ class Axe(models.Model):
 class Site(models.Model):
     '''This data will be added buy the COORD user'''
     name = models.CharField(max_length=50, unique=True)
-    territoire = models.CharField(max_length=50)
-    secteur = models.CharField(max_length=50, blank=True)
-    groupement = models.CharField(max_length=50, blank=True)
-    localite = models.CharField(max_length=50, blank=True)
+    village = models.ForeignKey(Village, null=True, blank=True, on_delete=models.SET_NULL)
     axe = models.ForeignKey(Axe,  related_name='sites', on_delete=models.CASCADE)
     date_added = models.DateTimeField(auto_now_add=True)
     date_updated = models.DateTimeField(auto_now=True)
@@ -315,9 +333,9 @@ class Site(models.Model):
     
 class Chantier(models.Model):
     '''This data will be added buy the COORD user'''
-    name = models.CharField(max_length=50, unique=True)
-    latitude = models.CharField(max_length=50, blank=True)
-    longitude = models.CharField(max_length=100, blank=True)
+    name = models.CharField(max_length=100, unique=True)
+    latitude = models.CharField(max_length=50, null=True, blank=True)
+    longitude = models.CharField(max_length=50, null=True, blank=True)
     site = models.ForeignKey(Site,  related_name='chantiers', on_delete=models.CASCADE)
     date_added = models.DateTimeField(auto_now_add=True)
     date_updated = models.DateTimeField(auto_now=True)
@@ -346,7 +364,7 @@ class Lot(models.Model):
     negociant = models.ForeignKey(Negociant, related_name='lots', on_delete=models.CASCADE)
     minerai = models.ForeignKey(Minerai,  related_name='lots', on_delete=models.CASCADE)
     colis = models.IntegerField()
-    poids = models.IntegerField()
+    poids = models.DecimalField(max_digits=10, decimal_places=2)
     tags = models.TextField()
     atm = models.CharField(max_length=30, blank=True, unique=True)
     chantier = models.ForeignKey(Chantier,  related_name='lots', on_delete=models.CASCADE)

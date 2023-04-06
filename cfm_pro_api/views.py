@@ -34,8 +34,19 @@ class AddressChoicesPagination(PageNumberPagination):
     page_size_query_param = 'page_size'
     max_page_size = 100
 
+# -------------------------------------------------------------------------------
+# USER-VIEWS
+# -------------------------------------------------------------------------------
+# !!!!!!!!!!!!!!!CHANGE ALLOWED METHODS
+class UserZoneListView(viewsets.ModelViewSet):
+    queryset = Zone.objects.all()
+    serializer_class = UserZoneSerializer
+    permission_classes = () # no permission/read_only
+    http_method_names = ['get', 'head', 'options']
+
+
 class UserCreateView(generics.GenericAPIView):
-    permission_classes = () # no permission required
+    permission_classes = () # no permission/post_only
     serializer_class = UserCreateSerializer
     http_method_names = ['post']
 
@@ -285,7 +296,7 @@ class VillageView(viewsets.ModelViewSet):
 @api_view(["GET"])
 def get_user_and_profile(request, *args, **kwargs):
     # body = request.body
-    user_instance =  User.objects.all().order_by('?').first()
+    user_instance =  User.objects.first()
     data = {}
     if user_instance:
         data = UserRetrieveSerializer(user_instance).data

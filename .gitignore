@@ -1,3 +1,5 @@
 fixtures/
 ./books.pdf
 ./django-multiple-user-types.png
+./migrations/
+./__pycache__

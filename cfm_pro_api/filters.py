@@ -9,7 +9,6 @@ class NegociantFilter(django_filters.FilterSet):
     class Meta:
         model = Negociant
         fields = {
-            'date' : ('exact', 'lte', 'gte'),
             'nom' : LOOKUP_EXPR, 
             'postnom' : LOOKUP_EXPR,
             'prenom' : LOOKUP_EXPR,
@@ -17,6 +16,8 @@ class NegociantFilter(django_filters.FilterSet):
             'birth_date' : ('exact', 'lte', 'gte'),
             'sex' : LOOKUP_EXPR,
             'address__name' : LOOKUP_EXPR,
+            'date_added' : ('exact', 'lte', 'gte'),
+            'date_updated' : ('exact', 'lte', 'gte'),
         }
 
 

@@ -225,3 +225,57 @@ class book(models.model):
 # DOCUMENTATION
 >>> pip install drf spectacular
 <!-- >>> pip install swagger-ui -->
+
+# EMPTY DATABASE
+>>> python manage.py dumpdata cfm_pro_api.Zone --format json --indent 4 > ./fixtures/zones_data.json
+```sql
+ALTER TABLE cooperatives DROP COLUMN address;
+DROP TABLE cfm_pro_api_user CASCADE;
+DROP TABLE cfm_pro_api_user_groups CASCADE;
+DROP TABLE cfm_pro_api_user_user_permissions CASCADE;
+DROP TABLE chantiers CASCADE;
+DROP TABLE chefferies CASCADE;
+DROP TABLE cooperatives CASCADE;
+DROP TABLE django_admin_log CASCADE;
+DROP TABLE django_content_type CASCADE;
+DROP TABLE django_migrations CASCADE;
+DROP TABLE django_session CASCADE;
+DROP TABLE groupements CASCADE;
+DROP TABLE lots CASCADE;
+DROP TABLE minerais CASCADE;
+DROP TABLE negociants CASCADE;
+DROP TABLE profiles CASCADE;
+DROP TABLE provinces CASCADE;
+DROP TABLE sites CASCADE;
+DROP TABLE territoires CASCADE;
+DROP TABLE transporteurs CASCADE;
+DROP TABLE villages CASCADE; 
+DROP TABLE axes CASCADE; 
+DROP TABLE zones CASCADE; 
+```
+
+# GeoDjango
+
+- install postgresql
+- install OSgeo4W form https://www.npackd.org/p/qgis64/3.24.2.1
+- modify windows environment
+set OSGEO4W_ROOT=C:\OSGeo4W
+set GDAL_DATA=%OSGEO4W_ROOT%\share\gdal
+set PROJ_LIB=%OSGEO4W_ROOT%\share\proj
+set PATH=%PATH%;%OSGEO4W_ROOT%\bin
+reg ADD "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /v Path /t REG_EXPAND_SZ /f /d "%PATH%"
+reg ADD "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /v GDAL_DATA /t REG_EXPAND_SZ /f /d "%GDAL_DATA%"
+reg ADD "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /v PROJ_LIB /t REG_EXPAND_SZ /f /d "%PROJ_LIB%"
+
+# LOAD DATA
+
+python manage.py loaddata ./fixtures/province_data_utf-8.json
+python manage.py loaddata ./fixtures/territoire_data_utf-8.json
+python manage.py loaddata ./fixtures/chefferie_data_utf-8.json
+python manage.py loaddata ./fixtures/groupement_data_utf-8.json
+python manage.py loaddata ./fixtures/village_data_utf-8.json
+python manage.py loaddata ./fixtures/zone_data_utf-8.json
+
+6249 bukavu ville
+6311 kindu ville
+6131 goma ville

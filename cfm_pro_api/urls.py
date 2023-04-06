@@ -8,8 +8,9 @@ router.register('lots', LotCustomView)
 router.register('lots/hyperlinks', LotHyperlinkedView)
 router.register('lots/keys', LotModelView)
 # users
-router.register('users', UserRetrieveListView)
+router.register('users', UserRetrieveListView) #write_only
 router.register('profiles', UserProfileListView)
+router.register('zones', UserZoneListView) #read_only
 # additional data
 router.register('negociants', NegociantView)
 router.register('transporteurs', TransporteurView)
@@ -33,8 +34,9 @@ urlpatterns = [
     path('', include(router.urls)),
     path('auth/', include("rest_framework.urls")), # route /api/v1/auth/login
     path('auth/register', UserCreateView.as_view()),
+    # path('zones/', UserZoneListView.as_view(actions)),
     # Authentication required
-    path('profiles/my-profile', UserProfileView.as_view(actions)),
+    path('profiles/my-profile/', UserProfileView.as_view(actions)),
     path('lots/upload', LotListCreateView.as_view()),
 
     # FILTERS / only COORD and higher are allowed
