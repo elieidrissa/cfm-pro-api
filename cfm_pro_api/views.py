@@ -33,7 +33,7 @@ class CustomPagination(PageNumberPagination):
 class AddressChoicesPagination(PageNumberPagination):
     '''Custom Pagination for 'territoire', 'groupement' .
         and 'village' results'''
-    page_size = 10
+    page_size = 300
     page_size_query_param = 'page_size'
     max_page_size = 100
 
@@ -386,7 +386,7 @@ class VillageFilterListView(ListAPIView):
     '''This view is used to SEARCH through negociants'''
     queryset = Village.objects.all()
     serializer_class = VillageDetailSerializer
-    pagination_class = CustomPagination
+    pagination_class = AddressChoicesPagination
     filter_backends = (DjangoFilterBackend,)
     filterset_class = VillageFilter
 
