@@ -36,7 +36,7 @@ urlpatterns = [
     path('auth/register', UserCreateView.as_view()),
     # path('zones/', UserZoneListView.as_view(actions)),
     # Authentication required
-    path('user/profile', UserProfileView.as_view(actions)),
+    path('auth/my-profile', UserProfileView.as_view(actions)),
     path('lots/upload', LotListCreateView.as_view()),
 
     # FILTERS / only COORD and higher are allowed
@@ -46,7 +46,7 @@ urlpatterns = [
     path('filter/minerais', MineraiFilterListView.as_view()),
     path('filter/chantiers', ChantierFilterListView.as_view()),
     path('filter/sites', SiteFilterListView.as_view()),
-    # address filters
+    # address filters / open to every authenticated user
     path('filter/territoires', TerritoireFilterListView.as_view()),
     path('filter/chefferies', ChefferieFilterListView.as_view()),
     path('filter/groupements', GroupementFilterListView.as_view()),
