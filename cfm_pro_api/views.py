@@ -1,23 +1,26 @@
 from .models import *
 from .serializers import *
-from django.shortcuts import render
+# from django.shortcuts import render
+# from rest_framework.decorators import action, api_view
 from rest_framework import generics, status, viewsets
 from rest_framework.generics import ListAPIView
-from rest_framework.decorators import action, api_view
 from rest_framework.response import Response
-# Pagination types
+# pagination types
+from rest_framework.response import Response
 from rest_framework.pagination import (LimitOffsetPagination, 
                                        PageNumberPagination)
-from rest_framework.response import Response
 # permissions
 from rest_framework.permissions import IsAuthenticated, SAFE_METHODS
 from .permissions import (IsCoordOrReadOnly, UpdateOrDeleteNotAllowed,
                           IsProfileOwner, IsCurrentUser, IsCoordOrDirecteur)
-# my toolkit
-from .utils import get_lots_stats
 # filters
 from django_filters.rest_framework import DjangoFilterBackend
-from .filters import LotFilter, NegociantFilter
+from .filters import (LotFilter, NegociantFilter, TransporteurFilter, 
+                      MineraiFilter, SiteFilter, ChantierFilter,
+                      TerritoireFilter, ChefferieFilter, GroupementFilter,
+                      VillageFilter)
+# my toolkit
+# from .utils import get_lots_stats
 
 
 class CustomPagination(PageNumberPagination):
@@ -64,7 +67,6 @@ class UserCreateView(generics.GenericAPIView):
 class UserProfileView(viewsets.ModelViewSet):
     serializer_class = UserProfileSerializer
     permission_classes = (IsProfileOwner, IsAuthenticated)
-    lookup_field = 'user'
 
     def get_queryset(self):
         return Profile.objects.filter(user=self.request.user)
@@ -157,23 +159,6 @@ class LotCustomView(viewsets.ModelViewSet):
     serializer_class = LotDetailSerializer
     pagination_class = CustomPagination
 
-# @api_view(['GET'])
-# def current_user_lots(request, *args, **kwargs):
-#     '''Get the following data:
-#     - all lots added by the current user
-#     - total of poids
-#     - total of colis'''
-#     user = request.user
-#     queryset = Lot.objects.filter(user=user)
-#     # stats
-#     data = get_lots_stats(queryset)
-#     # lots data
-#     serializer = LotDetailSerializer(queryset, many=True)
-#     serialized_qs = serializer.data
-#     # response data
-#     data.update({'lots':serialized_qs})
-#     return Response(data)
-
 
 class LotFilterListView(ListAPIView):
     '''This view is used to SEARCH through list of lots'''
@@ -196,17 +181,18 @@ class LotFilterListView(ListAPIView):
         return self.filterset.qs
 
 # -------------------------------------------------------------------------------
-# NEGOCIANTS, TRANSPORTEURS AND MINERAI
+# NEGOCIANTS
 # -------------------------------------------------------------------------------
 class NegociantView(viewsets.ModelViewSet):
     queryset = Negociant.objects.all()
     serializer_class = NegociantSerializer
     permission_classes = (IsCoordOrReadOnly,)
 
+
 class NegociantFilterListView(ListAPIView):
-    '''This view is used to SEARCH through list of lots'''
+    '''This view is used to SEARCH through negociants'''
     queryset = Negociant.objects.all()
-    serializer_class = LotDetailSerializer
+    serializer_class = NegociantDetailSerializer
     pagination_class = CustomPagination
     filter_backends = (DjangoFilterBackend,)
     filterset_class = NegociantFilter
@@ -217,46 +203,110 @@ class NegociantFilterListView(ListAPIView):
         self.filterset = NegociantFilter(req.GET, queryset=qs)
         return self.filterset.qs
 
+# -------------------------------------------------------------------------------
+# TRANSPORTEURS
+# -------------------------------------------------------------------------------
 class TransporteurView(viewsets.ModelViewSet):
     queryset = Transporteur.objects.all()
     serializer_class = TransporteurSerializer
     permission_classes = (IsCoordOrReadOnly,)
 
 
+class TransporteurFilterListView(ListAPIView):
+    '''This view is used to SEARCH through negociants'''
+    queryset = Transporteur.objects.all()
+    serializer_class = TransporteurDetailSerializer
+    pagination_class = CustomPagination
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = TransporteurFilter
+
+    def get_queryset(self):
+        req = self.request
+        qs = self.queryset
+        self.filterset = TransporteurFilter(req.GET, queryset=qs)
+        return self.filterset.qs
+
+# -------------------------------------------------------------------------------
+# MINERAIS
+# -------------------------------------------------------------------------------
 class MineraiView(viewsets.ModelViewSet):
     queryset = Minerai.objects.all()
     serializer_class = MineraiSerializer
     permission_classes = (IsCoordOrReadOnly,)
 
 
+class MineraiFilterListView(ListAPIView):
+    '''This view is used to SEARCH through negociants'''
+    queryset = Minerai.objects.all()
+    serializer_class = MineraiDetailSerializer
+    pagination_class = CustomPagination
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = MineraiFilter
+
+    def get_queryset(self):
+        req = self.request
+        qs = self.queryset
+        self.filterset = MineraiFilter(req.GET, queryset=qs)
+        return self.filterset.qs
+
+# -------------------------------------------------------------------------------
+# COOPERATIVES
+# -------------------------------------------------------------------------------
+# COOPS
 class CooperativeView(viewsets.ModelViewSet):
     queryset = Cooperative.objects.all()
     serializer_class = CooperativeSerializer
     permission_classes = (IsCoordOrReadOnly,)
 
-
+# AXES
 class AxeView(viewsets.ModelViewSet):
     queryset = Axe.objects.all()
     serializer_class = AxeSerializer
     permission_classes = (IsCoordOrReadOnly,)
 
-
+# SITES
 class SiteView(viewsets.ModelViewSet):
     queryset = Site.objects.all()
     serializer_class = SiteSerializer
     permission_classes = (IsCoordOrReadOnly,)
 
+class SiteFilterListView(ListAPIView):
+    '''This view is used to SEARCH through negociants'''
+    queryset = Site.objects.all()
+    serializer_class = SiteDetailSerializer
+    pagination_class = CustomPagination
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = SiteFilter
 
+    def get_queryset(self):
+        req = self.request
+        qs = self.queryset
+        self.filterset = SiteFilter(req.GET, queryset=qs)
+        return self.filterset.qs
+
+# CHANTIER
 class ChantierView(viewsets.ModelViewSet):
     queryset = Chantier.objects.all()
     serializer_class = ChantierSerializer
     permission_classes = (IsCoordOrReadOnly,)
 
+class ChantierFilterListView(ListAPIView):
+    '''This view is used to SEARCH through negociants'''
+    queryset = Chantier.objects.all()
+    serializer_class = ChantierDetailSerializer
+    pagination_class = CustomPagination
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = ChantierFilter
+
+    def get_queryset(self):
+        req = self.request
+        qs = self.queryset
+        self.filterset = ChantierFilter(req.GET, queryset=qs)
+        return self.filterset.qs
+
 # -------------------------------------------------------------------------------
 # TERRITORIES AND SUB_TERRITORIES
 # -------------------------------------------------------------------------------
-
-
 class ProvinceView(viewsets.ModelViewSet):
     queryset = Province.objects.all()
     serializer_class = ProvinceSerializer
@@ -269,36 +319,80 @@ class TerritoireView(viewsets.ModelViewSet):
     pagination_class = AddressChoicesPagination
     http_method_names = ['get', 'head', 'options']
 
+class TerritoireFilterListView(ListAPIView):
+    '''This view is used to SEARCH through negociants'''
+    queryset = Territoire.objects.all()
+    serializer_class = TerritoireDetailSerializer
+    pagination_class = CustomPagination
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = TerritoireFilter
+
+    def get_queryset(self):
+        req = self.request
+        qs = self.queryset
+        self.filterset = TerritoireFilter(req.GET, queryset=qs)
+        return self.filterset.qs
+    
+# CHEFFERIE
 class ChefferieView(viewsets.ModelViewSet):
     queryset = Chefferie.objects.all()
     serializer_class = ChefferieSerializer
     pagination_class = AddressChoicesPagination
     http_method_names = ['get', 'head', 'options']
 
+class ChefferieFilterListView(ListAPIView):
+    '''This view is used to SEARCH through negociants'''
+    queryset = Chefferie.objects.all()
+    serializer_class = ChefferieDetailSerializer
+    pagination_class = CustomPagination
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = ChefferieFilter
+
+    def get_queryset(self):
+        req = self.request
+        qs = self.queryset
+        self.filterset = ChefferieFilter(req.GET, queryset=qs)
+        return self.filterset.qs
+
+# GROUPEMENT
 class GroupementView(viewsets.ModelViewSet):
     queryset = Groupement.objects.all()
     serializer_class = GroupementSerializer
     pagination_class = AddressChoicesPagination
     http_method_names = ['get', 'head', 'options']
 
+class GroupementFilterListView(ListAPIView):
+    '''This view is used to SEARCH through negociants'''
+    queryset = Groupement.objects.all()
+    serializer_class = GroupementDetailSerializer
+    pagination_class = CustomPagination
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = GroupementFilter
+
+    def get_queryset(self):
+        req = self.request
+        qs = self.queryset
+        self.filterset = GroupementFilter(req.GET, queryset=qs)
+        return self.filterset.qs
+
+# VILLAGE
 class VillageView(viewsets.ModelViewSet):
     queryset = Village.objects.all()
     serializer_class = VillageSerializer
     pagination_class = AddressChoicesPagination
     http_method_names = ['get', 'head', 'options']
 
-# # views
-# def api_home(request):
-#     return JsonResponse(dict)
-# # urls.py
-# path('', views.api_home)
+class VillageFilterListView(ListAPIView):
+    '''This view is used to SEARCH through negociants'''
+    queryset = Village.objects.all()
+    serializer_class = VillageDetailSerializer
+    pagination_class = CustomPagination
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = VillageFilter
 
-@api_view(["GET"])
-def get_user_and_profile(request, *args, **kwargs):
-    # body = request.body
-    user_instance =  User.objects.first()
-    data = {}
-    if user_instance:
-        data = UserRetrieveSerializer(user_instance).data
-    return Response(data)
+    def get_queryset(self):
+        req = self.request
+        qs = self.queryset
+        self.filterset = VillageFilter(req.GET, queryset=qs)
+        return self.filterset.qs
 

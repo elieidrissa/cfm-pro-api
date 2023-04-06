@@ -122,7 +122,6 @@ class LotHyperlinkedSerializer(serializers.HyperlinkedModelSerializer):
 
 class LotDetailSerializer(serializers.ModelSerializer):
     # added_by = serializers.ReadOnlyField(source='user.nom')
-
     def to_representation(self, instance):
         # get data related to the lot
         user = instance.user
@@ -135,7 +134,7 @@ class LotDetailSerializer(serializers.ModelSerializer):
         response['minerai'] = instance.minerai.symbol
         response['chantier'] = instance.chantier.name
         response['cooperative'] = instance.cooperative.short_name
-        response['transporteur'] = transport.nom + ' ' + transport.postnom
+        response['transporteur'] = transport.nom +' '+ transport.postnom
         # resulting data
         return response
 
@@ -144,9 +143,8 @@ class LotDetailSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 # -------------------------------------------------------------------------------
-# ADDITIONAL-MODELS
+# NEGOCIANTS
 # -------------------------------------------------------------------------------
-
 class NegociantSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -154,67 +152,196 @@ class NegociantSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class TransporteurSerializer(serializers.ModelSerializer):
+class NegociantDetailSerializer(serializers.ModelSerializer):
+    def to_representation(self, instance):
+        response = super().to_representation(instance)
+        territoire = instance.birth_place
+        groupement = instance.address
+        # to avoid errors where 'NoneType' does have 'name' 
+        if territoire:
+            response['birth_place'] = territoire.name
+        if groupement:
+            response['address'] = groupement.name
+        # resulting data
+        return response
 
+    class Meta:
+        model = Negociant
+        fields = "__all__"
+
+# -------------------------------------------------------------------------------
+# TRANSPORTEURS
+# -------------------------------------------------------------------------------
+class TransporteurSerializer(serializers.ModelSerializer):
     class Meta:
         model = Transporteur
         fields = "__all__"
 
 
+class TransporteurDetailSerializer(serializers.ModelSerializer):
+    def to_representation(self, instance):
+        response = super().to_representation(instance)
+        negociant = instance.negociant
+        groupement = instance.address
+        # to avoid errors where 'NoneType' does have 'name' 
+        if groupement:
+            response['address'] = groupement.name
+        if negociant:
+            response['negociant'] = negociant.nom +' '+ negociant.postnom
+        # resulting data
+        return response
+
+    class Meta:
+        model = Transporteur
+        fields = "__all__"
+
+# -------------------------------------------------------------------------------
+# MINERAIS
+# -------------------------------------------------------------------------------
 class MineraiSerializer(serializers.ModelSerializer):
     class Meta:
         model = Minerai
         fields = "__all__"
 
+class MineraiDetailSerializer(serializers.ModelSerializer):
+    def to_representation(self, instance):
+        response = super().to_representation(instance)
+        return response
 
+    class Meta:
+        model = Minerai
+        fields = "__all__"
+
+# -------------------------------------------------------------------------------
+# COOPERATIVES, SITE, CHANTIERS...
+# -------------------------------------------------------------------------------
+# COOPS
 class CooperativeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Cooperative
         fields = "__all__"
-
 
 class AxeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Axe
         fields = "__all__"
 
-
+# AXES
 class SiteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Site
         fields = "__all__"
 
+class SiteDetailSerializer(serializers.ModelSerializer):
+    def to_representation(self, instance):
+        response = super().to_representation(instance)
+        axe = instance.axe
+        village = instance.village
+        if axe:
+            response['axe'] = axe.name
+        if village:
+            response['village'] = village.name
+        return response
 
+    class Meta:
+        model = Site
+        fields = "__all__"
+
+# CHANTIER
 class ChantierSerializer(serializers.ModelSerializer):
     class Meta:
         model = Chantier
         fields = "__all__"
 
-# -------------------------------------------------------------------------------
-# TERRITORIES AND SUB_TERRITORIES
-# -------------------------------------------------------------------------------
+class ChantierDetailSerializer(serializers.ModelSerializer):
+    def to_representation(self, instance):
+        response = super().to_representation(instance)
+        site = instance.site
+        if site:
+            response['site'] = site.name
+        return response
 
+    class Meta:
+        model = Chantier
+        fields = "__all__"
+
+# -------------------------------------------------------------------------------
+# PROVINCES, TERRITORIES AND SUB_TERRITORIES
+# -------------------------------------------------------------------------------
 class ProvinceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Province
         fields = "__all__"
 
+# TERRITOIRES
 class TerritoireSerializer(serializers.ModelSerializer):
     class Meta:
         model = Territoire
         fields = "__all__"
 
+class TerritoireDetailSerializer(serializers.ModelSerializer):
+    def to_representation(self, instance):
+        response = super().to_representation(instance)
+        province = instance.site
+        if province:
+            response['province'] = province.name
+        return response
+
+    class Meta:
+        model = Territoire
+        fields = "__all__"
+
+    
+# CHEFFERIES
 class ChefferieSerializer(serializers.ModelSerializer):
     class Meta:
         model = Chefferie
         fields = "__all__"
 
+class ChefferieDetailSerializer(serializers.ModelSerializer):
+    def to_representation(self, instance):
+        response = super().to_representation(instance)
+        territoire = instance.site
+        if territoire:
+            response['territoire'] = territoire.name
+        return response
+
+    class Meta:
+        model = Chefferie
+        fields = "__all__"
+
+# GROUPEMENT
 class GroupementSerializer(serializers.ModelSerializer):
     class Meta:
         model = Groupement
         fields = "__all__"
 
+class GroupementDetailSerializer(serializers.ModelSerializer):
+    def to_representation(self, instance):
+        response = super().to_representation(instance)
+        chefferie = instance.site
+        if chefferie:
+            response['chefferie'] = chefferie.name
+        return response
+
+    class Meta:
+        model = Groupement
+        fields = "__all__"
+
+# VILLAGE
 class VillageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Village
+        fields = "__all__"
+
+class VillageDetailSerializer(serializers.ModelSerializer):
+    def to_representation(self, instance):
+        response = super().to_representation(instance)
+        groupement = instance.site
+        if groupement:
+            response['groupement'] = groupement.name
+        return response
+
     class Meta:
         model = Village
         fields = "__all__"

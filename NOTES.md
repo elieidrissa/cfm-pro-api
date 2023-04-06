@@ -182,11 +182,17 @@ User = serializers.HiddenField(default=serializers.CurrentUserDefault())
 ```
 
 ## PG SHELL PROBLEM
->PROBLEM:
+> PROBLEM:
 'more' is not recognized as an internal or external command,
 operable program or batch file.
 > SOLUTION:
 >>> \pset pager off
+
+> PROBLEM:
+'ERROR:  character with byte sequence 0xe2 0x95 0x94 in encoding "UTF8" 
+has no equivalent in encoding "WIN1252"
+> SOLUTION:
+>>> SET client_encoding = 'UTF8';
 
 
 

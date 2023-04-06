@@ -5,12 +5,12 @@ from .views import *
 router  = routers.DefaultRouter()
 # lots
 router.register('lots', LotCustomView)
-router.register('lots/hyperlinks', LotHyperlinkedView)
-router.register('lots/keys', LotModelView)
+router.register('lots/hyperlinks', LotHyperlinkedView) #coord only
+router.register('lots/keys', LotModelView) #coord only
 # users
 router.register('users', UserRetrieveListView) #write_only
-router.register('profiles', UserProfileListView)
 router.register('zones', UserZoneListView) #read_only
+router.register('profiles', UserProfileListView)
 # additional data
 router.register('negociants', NegociantView)
 router.register('transporteurs', TransporteurView)
@@ -36,17 +36,19 @@ urlpatterns = [
     path('auth/register', UserCreateView.as_view()),
     # path('zones/', UserZoneListView.as_view(actions)),
     # Authentication required
-    path('profiles/my-profile/', UserProfileView.as_view(actions)),
+    path('user/profile', UserProfileView.as_view(actions)),
     path('lots/upload', LotListCreateView.as_view()),
 
     # FILTERS / only COORD and higher are allowed
     path('filter/lots', LotFilterListView.as_view()),
-    # path('filter/negociants', NegociantFilterListView.as_view()),
-    # path('filter/transporteurs', TansporteurFilterListView.as_view()),
-    # path('filter/chantiers', ChantierFilterListView.as_view()),
-    # path('filter/sites', SiteListView.as_view()),
-    # COORD
-    path('lots/details', LotModelView.as_view(actions), name='lots_details'),
-    path('lots/hyperlinks', LotHyperlinkedView.as_view(actions), name='lots_hyperlinks'),
-    # Read Only
+    path('filter/negociants', NegociantFilterListView.as_view()),
+    path('filter/transporteurs', TransporteurFilterListView.as_view()),
+    path('filter/minerais', MineraiFilterListView.as_view()),
+    path('filter/chantiers', ChantierFilterListView.as_view()),
+    path('filter/sites', SiteFilterListView.as_view()),
+    # address filters
+    path('filter/territoires', TerritoireFilterListView.as_view()),
+    path('filter/chefferies', ChefferieFilterListView.as_view()),
+    path('filter/groupements', GroupementFilterListView.as_view()),
+    path('filter/villages', VillageFilterListView.as_view()),
 ]

@@ -219,7 +219,6 @@ class Profile(models.Model):
 # -------------------------------------------------------------------------------
 # NEGOCIANTS, TRANSPORTEURS AND MINERAI
 # -------------------------------------------------------------------------------
-
 class Negociant(models.Model):
     '''All data that can be collected on a 'negociant' at the moment 03/2023'''
     nom = models.CharField(max_length=50)
@@ -249,9 +248,10 @@ class Transporteur(models.Model):
     nom = models.CharField(max_length=50)
     postnom = models.CharField(max_length=50)
     prenom = models.CharField(max_length=50, null=True, blank=True)
+    sex = models.CharField(max_length=10, choices=SEX_CHOICES, null=True, blank=True)
     negociant = models.ForeignKey(Negociant, on_delete=models.SET_NULL, blank=True, null=True)
     phone_number = PhoneNumberField(unique=True, null=True, blank=True)
-    authorization = models.CharField(max_length=30, blank=True, unique=True)
+    authorisation = models.CharField(max_length=30, blank=True, unique=True)
     address = models.ForeignKey(Groupement, null=True, blank=True, on_delete=models.SET_NULL)
     address_info = models.CharField(max_length=200, null=True, blank=True)
     plates = models.CharField(max_length=1000)
@@ -302,7 +302,6 @@ class Cooperative(models.Model):
 # -------------------------------------------------------------------------------
 # SITES
 # -------------------------------------------------------------------------------
-
 class Axe(models.Model):
     '''This data will be manualy added to the database'''
     name = models.CharField(max_length=30, unique=True)
@@ -349,7 +348,6 @@ class Chantier(models.Model):
 # -------------------------------------------------------------------------------
 # LOTS
 # -------------------------------------------------------------------------------
-
 class Lot(models.Model):
     '''Details:
     - 'date_reg': the date the 'Lot' was registered
