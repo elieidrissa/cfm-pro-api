@@ -271,7 +271,7 @@ class ChantierDetailSerializer(serializers.ModelSerializer):
 class ProvinceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Province
-        fields = "__all__"
+        exclude = ['date_added', 'date_updated']
 
 # TERRITOIRES
 class TerritoireSerializer(serializers.ModelSerializer):
@@ -282,14 +282,14 @@ class TerritoireSerializer(serializers.ModelSerializer):
 class TerritoireDetailSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         response = super().to_representation(instance)
-        province = instance.site
+        province = instance.province
         if province:
             response['province'] = province.name
         return response
 
     class Meta:
         model = Territoire
-        fields = "__all__"
+        exclude = ['date_added', 'date_updated']
 
     
 # CHEFFERIES
@@ -301,14 +301,14 @@ class ChefferieSerializer(serializers.ModelSerializer):
 class ChefferieDetailSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         response = super().to_representation(instance)
-        territoire = instance.site
+        territoire = instance.territoire
         if territoire:
             response['territoire'] = territoire.name
         return response
 
     class Meta:
         model = Chefferie
-        fields = "__all__"
+        exclude = ['date_added', 'date_updated']
 
 # GROUPEMENT
 class GroupementSerializer(serializers.ModelSerializer):
@@ -319,29 +319,35 @@ class GroupementSerializer(serializers.ModelSerializer):
 class GroupementDetailSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         response = super().to_representation(instance)
-        chefferie = instance.site
+        chefferie = instance.chefferie
+        territoire = instance.chefferie.territoire
         if chefferie:
             response['chefferie'] = chefferie.name
+        if territoire:
+            response['territoire'] = territoire.name
         return response
 
     class Meta:
         model = Groupement
-        fields = "__all__"
+        exclude = ['date_added', 'date_updated']
 
 # VILLAGE
 class VillageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Village
-        fields = "__all__"
+        exclude = ['date_added', 'date_updated']
 
 class VillageDetailSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         response = super().to_representation(instance)
-        groupement = instance.site
+        groupement = instance.groupement
+        territoire = instance.groupement.chefferie.territoire
         if groupement:
             response['groupement'] = groupement.name
+        if territoire:
+            response['territoire'] = territoire.name
         return response
 
     class Meta:
         model = Village
-        fields = "__all__"
+        exclude = ['date_added', 'date_updated']

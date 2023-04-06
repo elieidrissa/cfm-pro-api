@@ -137,6 +137,7 @@ class GroupementFilter(django_filters.FilterSet):
         fields = {
             'name' : LOOKUP_EXPR, 
             'chefferie__name' : LOOKUP_EXPR,
+            'chefferie__territoire__name' : LOOKUP_EXPR,
             'date_added' : ('exact', 'lte', 'gte'),
             'date_updated' : ('exact', 'lte', 'gte'),
         }
@@ -148,6 +149,8 @@ class VillageFilter(django_filters.FilterSet):
         fields = {
             'name' : LOOKUP_EXPR, 
             'groupement__name' : LOOKUP_EXPR,
+            'groupement__chefferie__name' : LOOKUP_EXPR,
+            'groupement__chefferie__territoire__name' : LOOKUP_EXPR,
             'date_added' : ('exact', 'lte', 'gte'),
             'date_updated' : ('exact', 'lte', 'gte'),
         }
