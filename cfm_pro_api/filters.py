@@ -22,6 +22,8 @@ class LotFilter(django_filters.FilterSet):
             'minerai__symbol' : LOOKUP_EXPR,
             'tags' : LOOKUP_EXPR,
             'atm' : LOOKUP_EXPR,
+            'colis' : ('exact', 'gte', 'lte'),
+            'poids' : ('exact', 'gte', 'lte'),
             'chantier__name' : LOOKUP_EXPR,
             'chantier__site__name' : LOOKUP_EXPR,
             'cooperative__short_name' : LOOKUP_EXPR,
