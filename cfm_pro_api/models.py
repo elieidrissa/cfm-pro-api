@@ -362,7 +362,7 @@ class Lot(models.Model):
     negociant = models.ForeignKey(Negociant, related_name='lots', on_delete=models.CASCADE)
     minerai = models.ForeignKey(Minerai,  related_name='lots', on_delete=models.CASCADE)
     colis = models.IntegerField()
-    poids = models.DecimalField(max_digits=10, decimal_places=2)
+    poids = models.IntegerField()
     tags = models.TextField()
     atm = models.CharField(max_length=30, blank=True, unique=True)
     chantier = models.ForeignKey(Chantier,  related_name='lots', on_delete=models.CASCADE)
