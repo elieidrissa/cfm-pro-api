@@ -96,7 +96,7 @@ class UserProfileView(viewsets.ModelViewSet):
     
     
 class UserProfileListView(viewsets.ModelViewSet):
-    queryset = Profile.objects.all()
+    queryset = Profile.objects.exclude(user__is_superuser=True)
     pagination_class = CustomPagination
     serializer_class = UserProfileSerializer
     permission_classes = (IsAuthenticated,)
@@ -105,15 +105,17 @@ class UserProfileListView(viewsets.ModelViewSet):
 
 class UserRetrieveView(viewsets.ModelViewSet):
     '''Only return the current user's details'''
-    queryset = User.objects.all()
+    queryset = User.objects.exclude(is_superuser=True)
     serializer_class = UserRetrieveSerializer
     permission_classes = (IsCurrentUser,)
 
+
 class UserRetrieveListView(viewsets.ModelViewSet):
     '''Gives the list of all users to the 'coord' level users'''
-    queryset = User.objects.all()
+    queryset = User.objects.exclude(is_superuser=True)
     serializer_class = UserRetrieveSerializer
     http_method_names = ['get', 'head', 'options']
+
 
 # -------------------------------------------------------------------------------
 # LOTS-VIEWS
