@@ -15,6 +15,7 @@ from .permissions import (IsCoordOrReadOnly, UpdateOrDeleteNotAllowed,
                           IsProfileOwner, IsCurrentUser, IsCoordOrDirecteur)
 # filters
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import SearchFilter, OrderingFilter
 from .filters import (LotFilter, NegociantFilter, TransporteurFilter, 
                       MineraiFilter, SiteFilter, ChantierFilter,
                       TerritoireFilter, ChefferieFilter, GroupementFilter,
@@ -164,8 +165,10 @@ class LotFilterListView(ListAPIView):
     '''This view is used to SEARCH through list of lots'''
     serializer_class = LotDetailSerializer
     pagination_class = CustomPagination
-    filter_backends = (DjangoFilterBackend,)
+    filter_backends = (DjangoFilterBackend, SearchFilter)
     filterset_class = LotFilter
+    search_fields = ('tags', 'chantier__name', 'cooperative__short_name', 
+                     'negociant__nom', 'negociant__postnom')
 
     def get_queryset(self):
         request = self.request
@@ -324,8 +327,10 @@ class TerritoireFilterListView(ListAPIView):
     queryset = Territoire.objects.all()
     serializer_class = TerritoireDetailSerializer
     pagination_class = CustomPagination
-    filter_backends = (DjangoFilterBackend,)
+    filter_backends = (DjangoFilterBackend, SearchFilter, OrderingFilter)
     filterset_class = TerritoireFilter
+    search_fields = ('^name',)
+    ordering = 'name'
 
     def get_queryset(self):
         req = self.request
@@ -345,8 +350,10 @@ class ChefferieFilterListView(ListAPIView):
     queryset = Chefferie.objects.all()
     serializer_class = ChefferieDetailSerializer
     pagination_class = CustomPagination
-    filter_backends = (DjangoFilterBackend,)
+    filter_backends = (DjangoFilterBackend,SearchFilter, OrderingFilter)
     filterset_class = ChefferieFilter
+    search_fields = ('^name',)
+    ordering_fields = ('name',)
 
     def get_queryset(self):
         req = self.request
@@ -366,8 +373,10 @@ class GroupementFilterListView(ListAPIView):
     queryset = Groupement.objects.all()
     serializer_class = GroupementDetailSerializer
     pagination_class = CustomPagination
-    filter_backends = (DjangoFilterBackend,)
+    filter_backends = (DjangoFilterBackend, SearchFilter, OrderingFilter)
     filterset_class = GroupementFilter
+    search_fields = ('^name',)
+    ordering_fields = ('name',)
 
     def get_queryset(self):
         req = self.request
@@ -387,8 +396,10 @@ class VillageFilterListView(ListAPIView):
     queryset = Village.objects.all()
     serializer_class = VillageDetailSerializer
     pagination_class = AddressChoicesPagination
-    filter_backends = (DjangoFilterBackend,)
+    filter_backends = (DjangoFilterBackend, SearchFilter, OrderingFilter)
     filterset_class = VillageFilter
+    search_fields = ('^name',)
+    ordering_fields = ('name',)
 
     def get_queryset(self):
         req = self.request
