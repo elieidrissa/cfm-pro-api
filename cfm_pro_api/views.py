@@ -308,14 +308,17 @@ class ChantierFilterListView(ListAPIView):
         return self.filterset.qs
 
 # -------------------------------------------------------------------------------
-# TERRITORIES AND SUB_TERRITORIES
+# PROVINCES, TERRITORIES, CHEFFERIES, GROUPEMENTS AND VILLAGES
+# - Territores includes 'villes'
+# - Chefferies includes 'commune'
+# - Groupements includes 'Quartiers'
 # -------------------------------------------------------------------------------
 class ProvinceView(viewsets.ModelViewSet):
     queryset = Province.objects.all()
     serializer_class = ProvinceSerializer
     http_method_names = ['get', 'head', 'options']
 
-
+# TERROTOIRES
 class TerritoireView(viewsets.ModelViewSet):
     queryset = Territoire.objects.all()
     serializer_class = TerritoireSerializer
@@ -323,7 +326,7 @@ class TerritoireView(viewsets.ModelViewSet):
     http_method_names = ['get', 'head', 'options']
 
 class TerritoireFilterListView(ListAPIView):
-    '''This view is used to SEARCH through negociants'''
+    '''This view is used to SEARCH through territoires'''
     queryset = Territoire.objects.all()
     serializer_class = TerritoireDetailSerializer
     pagination_class = CustomPagination
@@ -346,7 +349,7 @@ class ChefferieView(viewsets.ModelViewSet):
     http_method_names = ['get', 'head', 'options']
 
 class ChefferieFilterListView(ListAPIView):
-    '''This view is used to SEARCH through negociants'''
+    '''This view is used to SEARCH through chefferies'''
     queryset = Chefferie.objects.all()
     serializer_class = ChefferieDetailSerializer
     pagination_class = CustomPagination
@@ -369,7 +372,7 @@ class GroupementView(viewsets.ModelViewSet):
     http_method_names = ['get', 'head', 'options']
 
 class GroupementFilterListView(ListAPIView):
-    '''This view is used to SEARCH through negociants'''
+    '''This view is used to SEARCH through groupements'''
     queryset = Groupement.objects.all()
     serializer_class = GroupementDetailSerializer
     pagination_class = CustomPagination
@@ -392,7 +395,7 @@ class VillageView(viewsets.ModelViewSet):
     http_method_names = ['get', 'head', 'options']
 
 class VillageFilterListView(ListAPIView):
-    '''This view is used to SEARCH through negociants'''
+    '''This view is used to SEARCH through villages'''
     queryset = Village.objects.all()
     serializer_class = VillageDetailSerializer
     pagination_class = AddressChoicesPagination
@@ -406,4 +409,3 @@ class VillageFilterListView(ListAPIView):
         qs = self.queryset
         self.filterset = VillageFilter(req.GET, queryset=qs)
         return self.filterset.qs
-

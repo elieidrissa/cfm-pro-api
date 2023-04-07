@@ -1,6 +1,9 @@
 from django.urls import path, include
 from rest_framework import routers
 from .views import *
+# JWT authentication
+from rest_framework_simplejwt.views import (TokenObtainPairView, 
+                                            TokenRefreshView)
 
 router  = routers.DefaultRouter()
 # lots
@@ -30,10 +33,12 @@ router.register('villages', VillageView)
 actions = {'get': 'list', 'put': 'update', 'patch': 'update'}
 
 urlpatterns = [
-    # ALL-USERS
+    # ALL-USERS 
     path('', include(router.urls)),
+    path('auth/token/', TokenObtainPairView.as_view()), #JWT / get tokens
+    path('auth/token/refresh/', TokenRefreshView.as_view()), #JWT/ renew tokens
     path('auth/', include("rest_framework.urls")), # route /api/v1/auth/login
-    path('auth/register', UserCreateView.as_view()),
+    path('auth/register/', UserCreateView.as_view()),
 
     # Authentication required
     path('auth/my-profile', UserProfileView.as_view(actions)),
