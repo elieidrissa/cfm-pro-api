@@ -16,6 +16,7 @@ class LotFilter(django_filters.FilterSet):
             'user__nom' : LOOKUP_EXPR, 
             'user__postnom' : LOOKUP_EXPR,
             'user__prenom' : LOOKUP_EXPR,
+            'user__zone__code' : LOOKUP_EXPR,
             'negociant__nom' : LOOKUP_EXPR, 
             'negociant__postnom' : LOOKUP_EXPR,
             'negociant__prenom' : LOOKUP_EXPR,

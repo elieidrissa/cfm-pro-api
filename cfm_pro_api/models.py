@@ -373,8 +373,8 @@ class Lot(models.Model):
     date_confirm = models.DateTimeField(blank=True, null=True)
     date_updated = models.DateTimeField(auto_now=True)
 
-    # def __str__(self):
-    #     return self.negociant.nom + ', ' + self.colis + ', ' + self.poids
+    def __str__(self):
+        return f"{self.negociant.nom} {self.negociant.postnom}, {str(self.poids)} Kg"
 
     class Meta:
         db_table = 'lots'
