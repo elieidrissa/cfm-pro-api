@@ -177,8 +177,10 @@ class LotFilterListView(ListAPIView):
         user = request.user
 
         # only show 'all lots' to COORD or higher users
-        if user.is_COORD or user.is_superuser or user.is_DG:
+        if user.is_superuser or user.is_DG:
             qs = Lot.objects.all()
+        elif user.is_COORD:
+            qs = Lot.objects.filter(user__zone=user.zone)
         else:
             qs = Lot.objects.filter(user=user)
 

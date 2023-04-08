@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'phonenumber_field',
     'django_filters',
+    'drf_yasg',
     # my apps
     'cfm_pro_api'
 ]
