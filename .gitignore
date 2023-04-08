@@ -1,8 +1,8 @@
 fixtures/
 media/
-
-./books.pdf
-./django-multiple-user-types.png
-./cfm_pro_api/__pycache__/
-./cfm_pro_api/migrations/
-./cfm_pro_api/trash.py
+.env
+books.pdf
+django-multiple-user-types.png
+cfm_pro_api/__pycache__/
+cfm_pro_api/migrations/
+cfm_pro_api/trash.py

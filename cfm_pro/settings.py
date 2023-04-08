@@ -21,12 +21,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-)(inb0xd%(0dm69n-&bdc*n1&@(%49br%h_nlb!&0d765$06$@'
+SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = str(os.environ.get('DEBUG'))=='1'
 
 ALLOWED_HOSTS = []
+
+if not DEBUG:
+    ALLOWED_HOSTS += [os.environ.get('ALLOWED_HOSTS')]
 
 
 # Application definition
@@ -38,7 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    # third party libraries
+    # third party
     'rest_framework',
     'rest_framework.authtoken',
     'phonenumber_field',
@@ -48,7 +51,7 @@ INSTALLED_APPS = [
     'cfm_pro_api'
 ]
 
-AUTH_USER_MODEL = 'cfm_pro_api.User' #change the built in model the customised one
+AUTH_USER_MODEL = 'cfm_pro_api.User' #change the built-in model the customised one
 
 REST_FRAMEWORK = {
     'NON_FIELD_ERRORS_KEY': 'errors', #new: what shows up in a key-value error message
@@ -67,8 +70,8 @@ from datetime import timedelta
 
 SIMPLE_JWT = {
     # 'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
-    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=30),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=30),
 }
 
 MIDDLEWARE = [
@@ -106,17 +109,17 @@ WSGI_APPLICATION = 'cfm_pro.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'cfm_pro_db',
-        'USER': 'postgres',
-        # HIDE
-        'PASSWORD': 'windows1997',
-        'HOST': 'localhost',
-        'PORT': '',
+if DEBUG==1:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.environ.get('DB_NAME'),
+            'USER': os.environ.get('DB_USERNAME'),
+            'PASSWORD': os.environ.get('DB_PASSWORD'),
+            'HOST': os.environ.get('DB_HOST'),
+            'PORT': '',
+        }
     }
-}
 
 
 # Password validation
