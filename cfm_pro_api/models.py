@@ -3,6 +3,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from phonenumber_field.modelfields import PhoneNumberField
 from django.contrib.auth.models import PermissionsMixin
+from PIL import Image
 
 
 
@@ -210,6 +211,18 @@ class Profile(models.Model):
     email = models.EmailField(unique=True, blank=True, null=True)
     email_verified = models.BooleanField(default=False) # 'True' if email confirmed
     number_verified = models.BooleanField(default=False) # 'True' if number confirmed
+
+    # to downsize the profile images for performance reasons
+    def save(self):
+        super().save()
+        img_path = self.profile_img.path
+        img = Image.open(img_path)
+
+        if img.height > 300 or img.width > 300:
+            output_size = (300, 300)
+            img.thumbnail(output_size)
+            # save to same path as profile image to replace it
+            img.save(self.profile_img.path)
 
     def __str__(self):
         return f'{self.user.nom} {self.user.postnom} Profile'
