@@ -8,13 +8,16 @@ from rest_framework_simplejwt.views import (TokenObtainPairView,
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
+# profiles pics 
+from django.conf import settings
+from django.conf.urls.static import static
 
 # SWAGGER
 schema_view = get_schema_view(
    openapi.Info(
       title="CFM PRO API",
       default_version='v1',
-      description="This api serves backend to all CFM Pro projets",
+      description="This api serves as backend to all CFM Pro projets",
       terms_of_service="https://www.cfm-pro.com/policies-and-terms/",
       contact=openapi.Contact(email="sowerbean@gmail.com"),
       license=openapi.License(name="BSD License"),
@@ -37,7 +40,7 @@ router.register('profiles', UserProfileListView)
 router.register('negociants', NegociantView)
 router.register('transporteurs', TransporteurView)
 router.register('minerais', MineraiView)
-router.register('coopratives', CooperativeView)
+router.register('cooperatives', CooperativeView)
 router.register('axes', AxeView)
 router.register('sites', SiteView)
 router.register('chantiers', ChantierView)
@@ -83,6 +86,7 @@ urlpatterns = [
     re_path(r'^redoc/$', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc')
 ]
 
-
+if settings.DEBUG:
+   urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 

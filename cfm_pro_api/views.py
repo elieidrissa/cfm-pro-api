@@ -201,8 +201,10 @@ class NegociantFilterListView(ListAPIView):
     queryset = Negociant.objects.all()
     serializer_class = NegociantDetailSerializer
     pagination_class = CustomPagination
-    filter_backends = (DjangoFilterBackend,)
+    filter_backends = (DjangoFilterBackend, SearchFilter, OrderingFilter)
     filterset_class = NegociantFilter
+    search_fields = ('^nom', '^postnom', 'prenom')
+    ordering_fileds = ['nom', 'postnom', 'prenom']
 
     def get_queryset(self):
         req = self.request
@@ -224,8 +226,10 @@ class TransporteurFilterListView(ListAPIView):
     queryset = Transporteur.objects.all()
     serializer_class = TransporteurDetailSerializer
     pagination_class = CustomPagination
-    filter_backends = (DjangoFilterBackend,)
+    filter_backends = (DjangoFilterBackend, SearchFilter, OrderingFilter)
     filterset_class = TransporteurFilter
+    search_fields = ('^nom', '^postnom', 'prenom')
+    ordering_fileds = ['nom', 'postnom', 'prenom']
 
     def get_queryset(self):
         req = self.request
@@ -264,6 +268,9 @@ class CooperativeView(viewsets.ModelViewSet):
     queryset = Cooperative.objects.all()
     serializer_class = CooperativeSerializer
     permission_classes = (IsCoordOrReadOnly,)
+    filter_backends = (SearchFilter, OrderingFilter)
+    search_fields = ['short_name']
+    ordering = 'short_name'
 
 # AXES
 class AxeView(viewsets.ModelViewSet):
@@ -282,8 +289,10 @@ class SiteFilterListView(ListAPIView):
     queryset = Site.objects.all()
     serializer_class = SiteDetailSerializer
     pagination_class = CustomPagination
-    filter_backends = (DjangoFilterBackend,)
+    filter_backends = (DjangoFilterBackend, SearchFilter, OrderingFilter)
     filterset_class = SiteFilter
+    search_fields = ['name']
+    ordering = 'name'
 
     def get_queryset(self):
         req = self.request
@@ -302,8 +311,10 @@ class ChantierFilterListView(ListAPIView):
     queryset = Chantier.objects.all()
     serializer_class = ChantierDetailSerializer
     pagination_class = CustomPagination
-    filter_backends = (DjangoFilterBackend,)
+    filter_backends = (DjangoFilterBackend, SearchFilter, OrderingFilter)
     filterset_class = ChantierFilter
+    search_fields = ['name', 'site__name']
+    ordering = 'name'
 
     def get_queryset(self):
         req = self.request

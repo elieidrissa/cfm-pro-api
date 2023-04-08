@@ -63,6 +63,7 @@ class TransporteurFilter(django_filters.FilterSet):
             'postnom' : LOOKUP_EXPR,
             'prenom' : LOOKUP_EXPR,
             'sex' : LOOKUP_EXPR,
+            'birth_date' : ('exact', 'lte', 'gte'),
             'negociant__nom' : LOOKUP_EXPR,
             'phone_number' : LOOKUP_EXPR,
             'authorisation' : LOOKUP_EXPR,
@@ -129,6 +130,7 @@ class ChefferieFilter(django_filters.FilterSet):
         fields = {
             'name' : LOOKUP_EXPR, 
             'territoire__name' : LOOKUP_EXPR,
+            'territoire__province__name' : LOOKUP_EXPR,
             'date_added' : ('exact', 'lte', 'gte'),
             'date_updated' : ('exact', 'lte', 'gte'),
         }
@@ -154,6 +156,7 @@ class VillageFilter(django_filters.FilterSet):
             'groupement__name' : LOOKUP_EXPR,
             'groupement__chefferie__name' : LOOKUP_EXPR,
             'groupement__chefferie__territoire__name' : LOOKUP_EXPR,
+            'groupement__chefferie__territoire__province__name' : LOOKUP_EXPR,
             'date_added' : ('exact', 'lte', 'gte'),
             'date_updated' : ('exact', 'lte', 'gte'),
         }

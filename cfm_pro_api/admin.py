@@ -1,6 +1,7 @@
 from django.contrib import admin
 from .models import ( Negociant, Transporteur, 
-                    Minerai, Cooperative, Axe, Site, Chantier, Lot)
+                    Minerai, Cooperative, Axe, 
+                    Site, Chantier, Lot, Profile)
 from django.contrib.auth import get_user_model
 
 # admin.site.register(User) 
@@ -12,6 +13,7 @@ admin.site.register(Axe)
 admin.site.register(Site) 
 admin.site.register(Chantier)
 admin.site.register(Lot)
+admin.site.register(Profile)
 
 # customised user model
 User = get_user_model()

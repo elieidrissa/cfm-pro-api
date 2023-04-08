@@ -203,13 +203,16 @@ class Profile(models.Model):
     id_number = models.CharField(max_length=100, blank=True)
     address = models.ForeignKey(Groupement, null=True, blank=True, on_delete=models.SET_NULL)
     address_info = models.CharField(max_length=200, null=True, blank=True)
-    profile_img_url = models.URLField(blank=True, null=True)
+    profile_img = models.ImageField(default='default_profile.png')
     date_signup = models.DateTimeField(auto_now_add=True)
     date_updated = models.DateTimeField(auto_now=True)
     date_deleted = models.DateTimeField(blank=True, null=True)
     email = models.EmailField(unique=True, blank=True, null=True)
     email_verified = models.BooleanField(default=False) # 'True' if email confirmed
     number_verified = models.BooleanField(default=False) # 'True' if number confirmed
+
+    def __str__(self):
+        return f'{self.user.nom} {self.user.postnom} Profile'
               
     class Meta:
         db_table = 'profiles'
@@ -245,11 +248,12 @@ class Negociant(models.Model):
 class Transporteur(models.Model):
     '''A 'negociant' can be a 'transpoteur' that why the foreign key is here
       but not required'''
+    negociant = models.ForeignKey(Negociant, on_delete=models.SET_NULL, blank=True, null=True)
     nom = models.CharField(max_length=50)
     postnom = models.CharField(max_length=50)
     prenom = models.CharField(max_length=50, null=True, blank=True)
     sex = models.CharField(max_length=10, choices=SEX_CHOICES, null=True, blank=True)
-    negociant = models.ForeignKey(Negociant, on_delete=models.SET_NULL, blank=True, null=True)
+    birth_date = models.DateField(blank=True, null=True)
     phone_number = PhoneNumberField(unique=True, null=True, blank=True)
     authorisation = models.CharField(max_length=30, blank=True, unique=True)
     address = models.ForeignKey(Groupement, null=True, blank=True, on_delete=models.SET_NULL)
@@ -305,6 +309,7 @@ class Cooperative(models.Model):
 class Axe(models.Model):
     '''This data will be manualy added to the database'''
     name = models.CharField(max_length=30, unique=True)
+    zone = models.ForeignKey(Zone, null=True, blank=True, on_delete=models.SET_NULL)
     date_added = models.DateTimeField(auto_now_add=True)
     date_updated = models.DateTimeField(auto_now=True)
     
