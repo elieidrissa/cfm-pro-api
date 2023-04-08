@@ -35,6 +35,7 @@ router.register('lots/keys', LotModelView) #coord only
 # users
 router.register('users', UserRetrieveListView) #write_only
 router.register('zones', UserZoneListView) #read_only
+router.register('perimetres', UserPerimetreListView) #read_only
 router.register('profiles', UserProfileListView)
 # additional data
 router.register('negociants', NegociantView)

@@ -10,7 +10,14 @@ from phonenumber_field.serializerfields import PhoneNumberField
 class UserZoneSerializer(serializers.ModelSerializer):
     class Meta:
         model = Zone
-        fields = '__all__'
+        fields = ['id', 'name', 'code']
+
+
+class UserPerimetreSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Perimetre
+        fields = ['id', 'code']
+
 
 class UserProfileSerializer(serializers.ModelSerializer):
     user = serializers.PrimaryKeyRelatedField(read_only=True, 

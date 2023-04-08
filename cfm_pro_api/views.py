@@ -48,6 +48,12 @@ class UserZoneListView(viewsets.ModelViewSet):
     permission_classes = () # no permission/read_only
     http_method_names = ['get', 'head', 'options']
 
+class UserPerimetreListView(viewsets.ModelViewSet):
+    queryset = Perimetre.objects.all()
+    serializer_class = UserPerimetreSerializer
+    permission_classes = () # no permission/read_only
+    http_method_names = ['get', 'head', 'options']
+
 
 class UserCreateView(generics.GenericAPIView):
     permission_classes = () # no permission/post_only

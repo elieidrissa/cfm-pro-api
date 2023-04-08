@@ -6,15 +6,12 @@ from django.contrib.auth.models import PermissionsMixin
 from PIL import Image
 
 
-
-
 # options
 SEX_CHOICES = [('M', 'Male'), ('F', 'Female')]
 
-# profile img: https://www.gravatar.com/avatar/2c7d99fe281ecd3bcd65ab915bac6dd5?s=150
 
 # -------------------------------------------------------------------------------
-# TERRITORIES AND SUB_TERRITORIES
+# PROVINCES, TERRITOIRES, CHEFFERIRES, GROUP...
 # -------------------------------------------------------------------------------
 class Province(models.Model):
     name = models.CharField(max_length=50, unique=True)
@@ -144,10 +141,24 @@ class UserManager(BaseUserManager):
         return user
     
 
+class Perimetre(models.Model):
+    '''Perimetre d'exploitation'''
+    code = models.CharField(max_length=20, unique=True)
+    date_added = models.DateTimeField(auto_now_add=True)
+    date_updated = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.code
+
+    class Meta:
+        db_table = 'perimetres'
+
+
 class Zone(models.Model):
     '''Zone where a user works. This helps filter data by regions'''
     name = models.CharField(max_length=50, unique=True)
     territoire = models.OneToOneField(Territoire, null=True, on_delete=models.CASCADE)
+    perimetre = models.ForeignKey(Perimetre, null=True, blank=True, on_delete=models.CASCADE)
     code = models.CharField(max_length=5, unique=True)
     date_added = models.DateTimeField(auto_now_add=True)
     date_updated = models.DateTimeField(auto_now=True)
